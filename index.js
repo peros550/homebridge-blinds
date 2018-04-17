@@ -70,14 +70,9 @@ BlindsHTTPAccessory.prototype.getTargetPosition = function(callback) {
 BlindsHTTPAccessory.prototype.setTargetPosition = function(pos, callback) {
     this.log("Set TargetPosition: %s", pos);
     this.currentTargetPosition = pos;
-    if (this.currentTargetPosition == this.lastPosition) {
-        if (this.interval != null) clearInterval(this.interval);
-        if (this.timeout != null) clearTimeout(this.timeout);
-        this.log("Already here");
-        callback(null);
-        return;
-    }
-    const moveUp = (this.currentTargetPosition >= this.lastPosition);
+    
+    const moveUp = (this.currentTargetPosition == 100) || (this.currentTargetPosition > this.lastPosition);
+this.log("Last Position was %s", this.lastPosition);
     this.log((moveUp ? "Moving up" : "Moving down"));
 
     this.service
@@ -99,6 +94,16 @@ BlindsHTTPAccessory.prototype.setTargetPosition = function(pos, callback) {
     if (this.timeout != null) clearTimeout(this.timeout);
     this.interval = setInterval(function(){
         localThis.lastPosition += (moveUp ? 1 : -1);
+	if (localThis.lastPosition > 100){
+	localThis.lastPosition = 100;
+               
+	}
+	if (localThis.lastPosition < 0){
+	localThis.lastPosition = 0;
+               
+	}
+
+
         if (localThis.lastPosition == localThis.currentTargetPosition) {
             if (localThis.currentTargetPosition != 0 && localThis.currentTargetPosition != 100) {
                 localThis.httpRequest(localThis.stopURL, localThis.httpMethod, function() {
